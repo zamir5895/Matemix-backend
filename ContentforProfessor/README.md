@@ -17,13 +17,6 @@ Microservicio diseñado para asistir a profesores en la preparación de clases, 
 - `fecha_busqueda` (Timestamp)
 
 
-### `PDFP`
-- `id` (UUID)
-- `pdf_url` (String)
-- `fecha_procesado` (Timestamp)
-- `classroom_id` (String)
-
----
 
 ## 🌐 Endpoints
 
