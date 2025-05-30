@@ -17,7 +17,7 @@ Microservicio encargado de la gestión de usuarios (profesores, alumnos, adminis
 
 ### `Alumno`
 - Hereda de `User`
-- `seccion` (String)
+- Salon
 - `dni` (String, único)
 
 ### `Profesor`

@@ -143,8 +143,8 @@ Microservicio encargado de analizar el progreso académico de cada estudiante, g
 ## ⚙️ Tecnologías
 
 - **Lenguaje:** Python 3.x
-- **Framework:** Flask
-- **Base de Datos:** MongoDB (o PostgreSQL, según integración)
+- **Framework:** Fast API
+- **Base de Datos:** MongoDB
 - **IA:** OpenAI API u otro modelo de lenguaje para generación de consejos
 
 ---
