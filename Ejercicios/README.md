@@ -7,9 +7,69 @@ Microservicio encargado de generar y gestionar ejercicios, exámenes y recursos 
 
 ## 🗂️ Entidades
 
-...existing code...
+### `Exercise`
+- `id` (UUID)
+- `pregunta` (String)
+- `solucion_paso_a_paso` (String)
+- `pista` (String)
+- `opciones` (Array<String>)
+- `respuesta` (String)
+- `concepto_principal` (String)
+- `respuesta_correcta` (String)
+- `dificultad` (Enum: "facil" | "medio" | "dificil")
+- `subtopico_id` (UUID)
+- `topico_id` (UUID)
+
+### `Subtopico`
+- `id` (UUID)
+- `nombre` (String)
+- `descripcion` (String)
+- `video_referencia` (String)
+- `ejercicios` (Array<UUID>)
+
+### `Topico`
+- `id` (UUID)
+- `nombre` (String)
+- `descripcion` (String)
+- `subtopicos` (Array<UUID>)
+
+### `ExamSubtopic`
+- `id` (UUID)
+- `title` (String)
+- `exercises` (Array<UUID>)
+- `subtopico_id` (UUID)
+- `topic_id` (UUID)
+- `classroom_id` (UUID)
+
+### `ExamTopic`
+- `id` (UUID)
+- `title` (String)
+- `exercises` (Array<UUID>)
+- `topic_id` (UUID)
+- `classroom_id` (UUID)
+
+### `Exam`
+- `id` (UUID)
+- `title` (String)
+- `exercises` (Array<UUID>)
+- `classroom_id` (UUID)
+
+### `PDFResource`
+- `id` (UUID)
+- `url` (String)
+- `classroom_id` (UUID)
+
+### `EjercicioResuelto`
+- `id` (UUID)
+- `alumno_id` (UUID)
+- `exercise_id` (UUID)
+- `subtopico_id` (UUID)
+- `topico_id` (UUID)
+- `fecha_resuelto` (Timestamp)
+- `correcto` (Boolean)
 
 ---
+
 
 ## 🌐 Endpoints
 
