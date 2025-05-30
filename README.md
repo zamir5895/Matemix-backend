@@ -1,4 +1,4 @@
----
+# Requisitos
 
 ## 👩‍🏫 Módulo del Profesor (Funcionalidades Ampliadas)
 
@@ -58,11 +58,9 @@
 - **Diario de aprendizaje:**  
   Notas autogestionadas donde el alumno registra sus dudas y la IA las convierte en ejercicios posteriores.
 
----
 
 ## ✨ Funcionalidades Transversales (Para Ambos)
 
 - **Sincronización offline:**  
   Los alumnos pueden descargar ejercicios y videos para usarlos sin internet.
 
----
