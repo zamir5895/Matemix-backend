@@ -158,5 +158,6 @@ Archivo CSV/Excel adjunto con los datos de los alumnos.
 - Validación de datos en cada endpoint.
 - Seguridad y autenticación recomendadas para todas las rutas sensibles.
 - Documentar los endpoints con Swagger/OpenAPI si es posible.
+- Agregar mas endpoinds segun su criterio revisar el readme principal
 
 ---
