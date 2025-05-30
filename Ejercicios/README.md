@@ -144,4 +144,11 @@ Microservicio encargado de generar y gestionar ejercicios, exámenes y recursos 
 
 ---
 
-...existing code...
+## 📝 Notas
+
+- Los endpoints de reporte consumen toda la información de ejercicios resueltos, estadísticas y desempeño.
+- Los reportes pueden ser exportados a PDF o visualizados en el frontend.
+- Se recomienda proteger los endpoints con autenticación y roles.
+- Usar fast api con python
+
+---
