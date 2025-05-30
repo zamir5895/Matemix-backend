@@ -57,6 +57,11 @@ Microservicio encargado de la gestión de usuarios (profesores, alumnos, adminis
 | POST   | /salon                  | Crear un nuevo salón                        |
 | PUT    | /salon/{id}             | Actualizar información de un salón          |
 | DELETE | /salon/{id}             | Eliminar un salón                           |
+| GET    | /health                                      | Endpoint de salud del servicio.                                    |
+| GET    | /generar pdf para ejerccicios para un salon                                      | Endpoint de salud del servicio.                                    |
+| GET    | /generar pdf para salon con ejercicios de un tema                                      | Endpoint de salud del servicio.                                    || GET    | /generar pdf para ejerccicios para un salon   con ub subtema                                   | Endpoint de salud del servicio.                                    |
+| GET    | /generar pdf con ejercicios para un alumno sobre un tema                                      | Endpoint de salud del servicio.                                    |
+| GET    | /sobre un subtema                                      | Endpoint de salud del servicio.                                    |
 
 ---
 

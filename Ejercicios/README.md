@@ -24,7 +24,6 @@ Microservicio encargado de generar y gestionar ejercicios, exámenes y recursos 
 | GET    | /exercises/solved/count/subtopic/{id}        | Obtener cantidad de ejercicios resueltos por subtema.              |
 | POST   | /exams                                       | Crear examen automático.                                           |
 | GET    | /exams/{id}                                  | Obtener examen por ID.                                             |
-| POST   | /resources/pdf                               | Subir PDF y extraer ejercicios, clasificando por dificultad.       |
 | GET    | /resources/pdf/{id}                          | Obtener recurso PDF por ID.                                        |
 | GET    | /exercises                                   | Listar todos los ejercicios por subtema.                                       |
 | PUT    | /exercises/{id}                              | Actualizar un ejercicio.                                           |
