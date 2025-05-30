@@ -155,15 +155,7 @@ Microservicio encargado de analizar el progreso académico de cada estudiante, g
 2. Instala dependencias:  
    `pip install -r requirements.txt`
 3. Configura las variables de entorno para la base de datos y la API de IA.
-4. Ejecuta el microservicio:  
-   `flask run`
-
----
-
-## 📚 Referencias
-
-- [Flask Documentation](https://flask.palletsprojects.com/)
-- [OpenAI API](https://platform.openai.com/docs/)
-- [MongoDB Documentation](https://docs.mongodb.com/)
+4. Usar fast api y python para correr todo
+5. usa requirments.txt y documentar todo
 
 ---
