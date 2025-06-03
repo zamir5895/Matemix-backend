@@ -1,8 +1,13 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
 from pydantic import BaseModel, Field
 from bson import ObjectId
 from enum import Enum 
 from util import PyObjectId
+
+class NivelEnum(str, Enum):
+    facil = "facil"
+    medio = "medio"
+    dificil = "dificil"
 
 class EjercicioBase(BaseModel):
     pregunta: str
@@ -13,28 +18,23 @@ class EjercicioBase(BaseModel):
     solucion: Optional[List[str]] = None
     pistas: Optional[List[str]] = None
     concepto_principal: Optional[str] = None
+    nivel: NivelEnum
 
-class NivelEnum(str, Enum):
-    facil = "facil"
-    medio = "medio"
-    dificil = "dificil"
 
 class YoutubeContentModel(BaseModel):
-    title: str
-    description: Optional[str] = None
-    thumbnail_url: Optional[str] = None
+    url: Optional[str] = None
 
 
 class SubtemaBase(BaseModel):
-    nivel: NivelEnum
     titulo: str
-    preguntas: List[EjercicioBase]
+    preguntas: Dict[NivelEnum, List[ObjectId]] = {}
     descripcion: Optional[str] = None
-    video_id: Optional[List[PyObjectId]] = None
+    video_id: Optional[List[PyObjectId]] = []
 
 class TemaBase(BaseModel):
     nombre: str
     descripcion: str
+    classroom_id:int
     subtema_id: Optional[List[PyObjectId]] = None
 
 class TemaCreate(TemaBase):

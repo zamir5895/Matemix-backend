@@ -5,11 +5,13 @@ from azure.ai.inference import ChatCompletionsClient
 from azure.ai.inference.models import SystemMessage, UserMessage
 from azure.core.credentials import AzureKeyCredential
 from schemas.Temas import TemaCreate, NivelEnum
-from db import temas_collection, progresos_collection
+from db.db import temas_collection
 import hashlib
-from typing import Dict, List, Optional
+from typing import Dict
 from bson import ObjectId
 from fastapi import HTTPException
+from Repositorio.TemaRepositorio import TemaRepository
+
 
 class GPTService:
     def __init__(self):
@@ -20,6 +22,7 @@ class GPTService:
             endpoint=endpoint,
             credential=AzureKeyCredential(token),
         )
+        self.tema_repository = TemaRepository()
         self.model = model
 
     def _generar_hash_pregunta(self, pregunta: Dict) -> str:
@@ -27,12 +30,6 @@ class GPTService:
         contenido = f"{pregunta['pregunta']}_{pregunta['respuesta_correcta']}"
         return hashlib.md5(contenido.encode()).hexdigest()
 
-    async def _verificar_tema_existente(self, tema: str) -> bool:
-        """Verifica si un tema ya existe en la base de datos"""
-        tema_existente = await temas_collection.find_one(
-            {"nombre": {"$regex": f"^{tema}$", "$options": "i"}}
-        )
-        return tema_existente is not None
 
     async def _filtrar_ejercicios_duplicados(self, tema_nombre: str, nuevos_ejercicios: Dict) -> Dict:
         """
@@ -84,7 +81,7 @@ class GPTService:
         Raises:
             HTTPException: Si el tema ya existe y no se fuerza la generación
         """
-        if not forzar_generacion and await self._verificar_tema_existente(tema):
+        if not forzar_generacion and await self.tema_repository._verificar_tema_existente(tema):
             raise HTTPException(
                 status_code=400,
                 detail=f"El tema '{tema}' ya existe en la base de datos. Use forzar_generacion=True para regenerar."
@@ -104,11 +101,8 @@ class GPTService:
             - respuesta_correcta: string o número
             - es_multiple_choice: boolean
             - opciones: array de strings (si es multiple choice)
-            - solucion: array de strings (pasos para resolver)
-            - pista: array de strings (sugerenc para resolver)
-            - concepto_principal: string (concepto matemático evaluado)
 
-            3. Contexto peruano (ej. usar soles, referenc locales)
+            3. Contexto peruano (ej. usar soles, referencias locales)
 
             Ejemplo de formato esperado:
             {{
@@ -117,10 +111,7 @@ class GPTService:
                 "pregunta": "¿Cuánto es 2 + 3?",
                 "respuesta_correcta": "5",
                 "es_multiple_choice": true,
-                "opciones": ["3", "4", "5", "6"],
-                "solucion": ["2 + 3 = 5"],
-                "pista": ["Piensa en sumar dos números pequeños","Ahorra tiempo al sumar en línea"],
-                "concepto_principal": "Suma básica"
+                "opciones": ["3", "4", "5", "6"]
                 }}
             ],
             "medio": [...],
@@ -184,11 +175,11 @@ class GPTService:
         if tema_existente:
             await temas_collection.update_one(
                 {"_id": ObjectId(tema_existente["_id"])},
-                {"$set": tema_obj.dict(by_al=True)}
+                {"$set": tema_obj.dict(by_alias=True)}
             )
             operation = "actualizado"
         else:
-            await temas_collection.insert_one(tema_obj.dict(by_al=True))
+            await temas_collection.insert_one(tema_obj.dict(by_alias=True))
             operation = "creado"
 
         return {
@@ -203,176 +194,7 @@ class GPTService:
             }
         }
 
-    async def generar_ejercicios_adicionales(self, tema: str, nivel: str, cantidad: int = 5, 
-                                           alumno_id: Optional[str] = None) -> List[Dict]:
-        """
-        Genera ejercicios adicionales basados en el nivel del alumno
-        
-        Args:
-            tema: Tema de los ejercicios
-            nivel: Nivel de dificultad (facil, medio, dificil)
-            cantidad: Cantidad de ejercicios a generar
-            alumno_id: ID del alumno para personalizar (opcional)
-        
-        Returns:
-            List[Dict]: Lista de ejercicios adicionales
-        """
-        
-        # Si hay alumno_id, obtener su historial para personalizar
-        contexto_alumno = ""
-        if alumno_id and ObjectId.is_valid(alumno_id):
-            try:
-                progreso = await progresos_collection.find_one({
-                    "alumno_id": ObjectId(alumno_id)
-                })
-                if progreso and progreso.get("respuestas"):
-                    respuestas_incorrectas = [
-                        r for r in progreso["respuestas"] 
-                        if not r.get("correcto", True)
-                    ]
-                    if respuestas_incorrectas:
-                        contexto_alumno = f"""
-                        CONTEXTO DEL ALUMNO:
-                        El alumno ha tenido dificultades con estos tipos de ejercicios:
-                        {json.dumps([r["pregunta"] for r in respuestas_incorrectas[-3:]], indent=2)}
-                        
-                        Genera ejercicios que refuercen estos conceptos.
-                        """
-            except:
-                pass  # Si hay error, continuar sin personalización
-
-        PROMPT_ADICIONALES = f"""
-        Genera {cantidad} ejercicios adicionales de matemáticas para 2° de secundaria (Perú).
-        
-        **ESPECIFICACIONES:**
-        - Tema: {tema}
-        - Nivel: {nivel}
-        - Cantidad: {cantidad}
-        
-        {contexto_alumno}
-        
-        **REQUISITOS:**
-        1. Los ejercicios deben ser del nivel "{nivel}" únicamente
-        2. Variedad en los tipos de problemas dentro del mismo nivel
-        3. Contexto peruano (usar soles, referenc locales)
-        4. Progresión gradual en complejidad dentro del nivel
-        
-        **FORMATO JSON:**
-        [
-            {{
-                "pregunta": "Enunciado claro del ejercicio",
-                "respuesta_correcta": "Respuesta exacta",
-                "es_multiple_choice": boolean,
-                "opciones": ["opcion1", "opcion2", "opcion3", "opcion4"] (si es multiple choice),
-                "pista": "Pista útil para resolver el ejercicio",
-                "concepto_principal": "Concepto matemático principal que evalúa"
-            }}
-        ]
-        
-        IMPORTANTE: Responde únicamente con el JSON válido, sin texto adicional.
-        """
-
-        try:
-            response = self.client.complete(
-                messages=[
-                    SystemMessage("Eres un generador experto de ejercicios matemáticos personalizados."),
-                    UserMessage(PROMPT_ADICIONALES),
-                ],
-                temperature=0.8,  # Un poco de creatividad pero no demasiado
-                top_p=0.9,
-                model=self.model
-            )
-            
-            ejercicios = json.loads(response.choices[0].message.content)
-            
-            # Validar que se generaron ejercicios
-            if not isinstance(ejercicios, list) or len(ejercicios) == 0:
-                raise ValueError("No se generaron ejercicios válidos")
-            
-            return ejercicios
-            
-        except json.JSONDecodeError as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Error al procesar ejercicios adicionales: {str(e)}"
-            )
-        except Exception as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Error al generar ejercicios adicionales: {str(e)}"
-            )
-
-    async def generar_ejercicios_personalizados(self, alumno_id: str, tema: str, 
-                                              dificultades_identificadas: List[str]) -> Dict:
-        """
-        Genera ejercicios personalizados basados en las dificultades del alumno
-        
-        Args:
-            alumno_id: ID del alumno
-            tema: Tema de los ejercicios
-            dificultades_identificadas: Lista de conceptos donde el alumno tiene dificultades
-        
-        Returns:
-            Dict: Ejercicios personalizados organizados por tipo de dificultad
-        """
-        
-        PROMPT_PERSONALIZADOS = f"""
-        Genera ejercicios de refuerzo personalizados para un alumno de 2° de secundaria.
-        
-        **INFORMACIÓN DEL ALUMNO:**
-        - Tema a reforzar: {tema}
-        - Dificultades identificadas: {', '.join(dificultades_identificadas)}
-        
-        **OBJETIVO:**
-        Crear ejercicios específicos que ayuden al alumno a superar estas dificultades.
-        
-        **FORMATO JSON:**
-        {{
-            "ejercicios_refuerzo": [
-                {{
-                    "pregunta": "Ejercicio enfocado en la dificultad específica",
-                    "respuesta_correcta": "Respuesta",
-                    "es_multiple_choice": boolean,
-                    "opciones": [...] (si aplica),
-                    "dificultad_objetivo": "¿Qué dificultad específica aborda?",
-                    "estrategia_resolucion": "Estrategia recomendada para resolver",
-                    "error_comun": "Error común que los estudiantes cometen aquí"
-                }}
-            ],
-            "ejercicios_aplicacion": [
-                {{
-                    "pregunta": "Ejercicio de aplicación práctica",
-                    "respuesta_correcta": "Respuesta",
-                    "contexto_real": "Contexto de la vida real",
-                    "conceptos_integrados": ["concepto1", "concepto2"]
-                }}
-            ]
-        }}
-        
-        Genera 3 ejercicios de refuerzo y 2 de aplicación.
-        """
-
-        try:
-            response = self.client.complete(
-                messages=[
-                    SystemMessage("Eres un tutor personalizado que crea ejercicios específicos para las necesidades de cada alumno."),
-                    UserMessage(PROMPT_PERSONALIZADOS),
-                ],
-                temperature=0.6,
-                top_p=0.9,
-                model=self.model
-            )
-            
-            ejercicios = json.loads(response.choices[0].message.content)
-            return ejercicios
-            
-        except Exception as e:
-            raise HTTPException(
-                status_code=500,
-                detail=f"Error al generar ejercicios personalizados: {str(e)}"
-            )
-
-    async def analizar_patron_errores(self, respuestas_alumno: List[Dict]) -> Dict:
+   
         """
         Analiza patrones de errores en las respuestas del alumno
         
@@ -412,7 +234,7 @@ class GPTService:
                 }}
             ],
             "recomendaciones": "Recomendaciones específicas para mejorar",
-            "estrateg_enseñanza": [
+            "estrategias_enseñanza": [
                 "Estrategia 1 específica",
                 "Estrategia 2 específica"
             ],
