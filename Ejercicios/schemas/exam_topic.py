@@ -1,7 +1,7 @@
 from typing import List, Optional
 from pydantic import BaseModel, Field
 from bson import ObjectId
-from Ejercicios.schemas.Temas import Ejercicio
+from Temas import Ejercicio
 from util import PyObjectId
 
 

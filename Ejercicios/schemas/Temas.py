@@ -9,7 +9,7 @@ class EjercicioBase(BaseModel):
     respuesta_correcta: str
     es_multiple_choice: bool = False 
     opciones: Optional[List[str]] = None
-    respuesta: Optional[str] = None
+    respuesta_correcta: Optional[str] = None
     solucion: Optional[List[str]] = None
     pistas: Optional[List[str]] = None
     concepto_principal: Optional[str] = None
@@ -45,6 +45,7 @@ class SubtemaCreate(SubtemaBase):
 
 class EjercicioCreate(EjercicioBase):
     pass
+
 class Ejercicio(EjercicioBase):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
 
@@ -52,8 +53,6 @@ class Ejercicio(EjercicioBase):
         populate_by_name = True
         arbitrary_types_allowed = True
         json_encoders = {ObjectId: str}
-
-
 
 class Subtema(SubtemaBase):
     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
