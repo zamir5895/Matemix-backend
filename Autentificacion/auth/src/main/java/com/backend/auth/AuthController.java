@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
     @Autowired
     private authService auth;
-    
+
     @PostMapping("/generate-token")
     public ResponseEntity<?> generateToken(@RequestBody tokenRequest tokenRequest) {
         try{
