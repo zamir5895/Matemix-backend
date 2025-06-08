@@ -1,45 +1,57 @@
 from db.db import temas_collection
-from schemas.Temas import TemaCreate
-
 from bson import ObjectId
-
+from pymongo.errors import PyMongoError
+from models.Temas import CreateTema
 class TemaRepository:
-    async def exists(nombre: str, curso_id: int):
-        existing_tema = await temas_collection.find_one({"nombre": nombre, "curso_id": curso_id})
-        return existing_tema is not None
+    
+
+    async def exists(self, nombre: str, curso_id: int):
+        try:
+            existing_tema = await temas_collection.find_one({"nombre": nombre, "classroom_id": curso_id})
+            return existing_tema is not None
+        except PyMongoError as e:
+            return False
 
     async def _verificar_tema_existente(self, tema: str) -> bool:
-        """Verifica si un tema ya existe en la base de datos"""
-        tema_existente = await temas_collection.find_one(
-            {"nombre": {"$regex": f"^{tema}$", "$options": "i"}}
-        )
-        return tema_existente is not None
-    
-    """ Buscamos el tema si existe por el classroom_id"""
+        try:
+            tema_existente = await temas_collection.find_one(
+                {"nombre": {"$regex": f"^{tema}$", "$options": "i"}}
+            )
+            return tema_existente is not None
+        except PyMongoError as e:
+            return False
 
-    async def existsByClassroom_id(self, classroom_id: int) -> bool:
-        """
-        Verifica si un tema ya existe en la base de datos por su classroom_id.
-        
-        Args:
-            classroom_id (str): El ID del classroom del tema a verificar.
-        
-        Returns:
-            bool: True si el tema existe, False en caso contrario.
-        """
-        tema_existente = await temas_collection.find_one({"classroom_id": classroom_id})
-        return tema_existente is not None
+    async def getTemasBySalonId(self, classroom_id: int):
+        try:
+            temas = await temas_collection.find({"classroom_id": classroom_id}).to_list(length=None)
+            return temas
+        except PyMongoError as e:
+            return []
+
+    async def getTemaById(self, id: str):
+        try:
+            tema = await temas_collection.find_one({"_id": ObjectId(id)})
+            return tema
+        except PyMongoError as e:
+            return None
+
+    async def addSubTemaToTema(self, tema_id: str, subtema_id: str):
+        try:
+            result = await temas_collection.update_one(
+                {"_id": ObjectId(tema_id)},
+                {"$addToSet": {"subtema_id": (subtema_id)}}
+            )
+            return result.modified_count > 0
+        except PyMongoError as e:
+            return False
     
-    """Obtenemos los temas por el classroom_id"""
-    async def getTemasBySalonId(self, classroom_id:int):
-        """
-        Obtiene todos los temas asociados a un classroom_id.
-        
-        Args:
-            classroom_id (int): El ID del classroom del que se desean obtener los temas.
-        
-        Returns:
-            List[Dict]: Lista de temas asociados al classroom_id.
-        """
-        temas = await temas_collection.find({"classroom_id": classroom_id}).to_list(length=None)
-        return temas
+    async def createTema(self,tema:CreateTema):
+        try:
+            tema_dict = tema.dict(by_alias=True)
+            result = await temas_collection.insert_one(tema_dict)
+            return str(result.inserted_id) 
+
+        except PyMongoError as e:
+            return None
+
+       

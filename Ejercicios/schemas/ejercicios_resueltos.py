@@ -1,19 +1,27 @@
 from typing import Optional
 from pydantic import BaseModel, Field
 from bson import ObjectId
-from util import PyObjectId
+from schemas.Util import PyObjectId
 
-class EjercicioResuelto(BaseModel):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+class EjercicioResueltoBase(BaseModel):
+    """
+    Base model for resolved exercises.
+    """
     ejercicio_id: PyObjectId
-    subtema_id: PyObjectId
-    tema_id: PyObjectId
-    alumno_id: int
     respuesta_usuario: str
     es_correcta: bool
-    intentos: int = 0
-    fecha_resuelto: Optional[str] = None
+    fecha_resolucion: Optional[str] = None
+    tema_id: str
+    subtema_id: str
 
-    class Config:
-        arbitrary_types_allowed = True
-        json_encoders = {ObjectId: str}
+class EjerciciosResueltoByAlumno(BaseModel):
+    alumno_id:str
+    ejercicios_resueltos: list[EjercicioResueltoBase] = Field(default_factory=list)
+
+class CreateEjercicioResuelto(EjercicioResueltoBase):
+    """
+    Model for creating a resolved exercise.
+    """
+    pass
+class EjercicioResuelto(EjerciciosResueltoByAlumno):
+    """

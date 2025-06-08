@@ -2,7 +2,7 @@ from typing import List, Optional
 from pydantic import BaseModel, Field
 from bson import ObjectId
 from Temas import Ejercicio
-from util import PyObjectId
+from schemas.Util import PyObjectId
 
 
 class Exam_topic_Base(BaseModel):

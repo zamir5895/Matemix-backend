@@ -2,7 +2,7 @@ from typing import List, Optional, Dict
 from pydantic import BaseModel, Field
 from bson import ObjectId
 from enum import Enum 
-from util import PyObjectId
+from schemas.Util import PyObjectId
 
 class NivelEnum(str, Enum):
     facil = "facil"
@@ -21,21 +21,19 @@ class EjercicioBase(BaseModel):
     nivel: NivelEnum
 
 
-class YoutubeContentModel(BaseModel):
-    url: Optional[str] = None
-
 
 class SubtemaBase(BaseModel):
     titulo: str
-    preguntas: Dict[NivelEnum, List[ObjectId]] = {}
+    preguntas: Dict[NivelEnum, List[str]] = {}    
     descripcion: Optional[str] = None
-    video_id: Optional[List[PyObjectId]] = []
+    video_urls: Optional[List[str]] = []
+    tema_id: Optional[str] = None
 
 class TemaBase(BaseModel):
     nombre: str
     descripcion: str
     classroom_id:int
-    subtema_id: Optional[List[PyObjectId]] = None
+    subtema_id: Optional[List[str]] = None
 
 class TemaCreate(TemaBase):
     pass
@@ -47,7 +45,7 @@ class EjercicioCreate(EjercicioBase):
     pass
 
 class Ejercicio(EjercicioBase):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    id: str = Field( alias="_id")
 
     class Config:
         populate_by_name = True
@@ -55,7 +53,7 @@ class Ejercicio(EjercicioBase):
         json_encoders = {ObjectId: str}
 
 class Subtema(SubtemaBase):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    id: str = Field(alias="_id")
 
     class Config:
         populate_by_name = True
@@ -63,7 +61,7 @@ class Subtema(SubtemaBase):
         json_encoders = {ObjectId: str}
 
 class Tema(TemaBase):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
+    id: str = Field(alias="_id")
 
     class Config:
         populate_by_name = True

@@ -1,24 +1,25 @@
 from fastapi import FastAPI
-from db.config import settings
-from db.db import connect_to_mongo, close_mongo_connection
 from crud.EjerciciosCrud import router as ejercicios_router 
+from crud.TemaCrud import router as tema_router
+from contextlib import asynccontextmanager
+from fastapi.middleware.cors import CORSMiddleware
+from crud.SubTemaCrud import router as subtema_router
 
 app = FastAPI(
     title="Matemix Content Service",
     description="Microservicio para ejercicios y recursos educativos",
-    version="1.0.0"
+    version="1.0.0",
 )
-
-@app.on_event("startup")
-async def startup_db_client():
-    await connect_to_mongo()
-
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    await close_mongo_connection()
-
-# Incluye el router aquí
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 app.include_router(ejercicios_router, prefix="/exercises", tags=["Ejercicios"])
+app.include_router(tema_router, prefix="/topics", tags=["Temas"])
+app.include_router(subtema_router, prefix="/subtopics", tags=["Subtemas"])
 
 @app.get("/")
 async def root():

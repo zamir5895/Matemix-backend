@@ -78,18 +78,18 @@ Microservicio encargado de generar y gestionar ejercicios, exámenes y recursos 
 | POST   | /exercises/generate                          | Generar ejercicios con IA.                                         |
 | GET    | /exercises/{id}                              | Obtener ejercicio por ID.                                          |
 | GET    | /exercises/level/{dificultad}                | Listar ejercicios por nivel de dificultad.                         |
-| POST   | /exercises/verify                            | Verificar respuesta de un ejercicio y los guarda el solved.                               |
+| POST   | /exercises/verify                            | Verificar respuesta de un ejercicio y los guarda el solved.        |
 | POST   | /exercises/personalized                      | Generar ejercicios personalizados según peticion del alumno.       |
 | GET    | /exercises/solved/count/topic/{id}           | Obtener cantidad de ejercicios resueltos por tema.                 |
 | GET    | /exercises/solved/count/subtopic/{id}        | Obtener cantidad de ejercicios resueltos por subtema.              |
 | POST   | /exams                                       | Crear examen automático.                                           |
 | GET    | /exams/{id}                                  | Obtener examen por ID.                                             |
 | GET    | /resources/pdf/{id}                          | Obtener recurso PDF por ID.                                        |
-| GET    | /exercises                                   | Listar todos los ejercicios por subtema.                                       |
+| GET    | /exercises                                   | Listar todos los ejercicios por subtema.                           |
 | PUT    | /exercises/{id}                              | Actualizar un ejercicio.                                           |
 | DELETE | /exercises/{id}                              | Eliminar un ejercicio.                                             |
 | GET    | /exercises/subtopic/{subtopico_id}           | Listar ejercicios por subtema.                                     |
-| GET    | /exercises/topic/{topico_id}                 | Listar todos los temas.                                        |
+| GET    | /exercises/topic/{topico_id}                 | Listar todos los temas.                                            |
 | GET    | /exercises/random/{cantidad}                 | Obtener ejercicios aleatorios.                                     |
 | GET    | /subtopics                                   | Listar todos los subtemas.                                         |
 | GET    | /subtopics/{id}                              | Obtener subtema por ID.                                            |

@@ -1,29 +1,34 @@
-from db.db import subtemas_collection
-from schemas.Temas import EjercicioCreate
+from db.db import ejercicios_collection
+from models.Ejerccicio import EjercicioCreate
 from bson import ObjectId
 
 class EjercicioRepository:
-    @staticmethod
-    async def create(ejercicio: EjercicioCreate):
-        result = await subtemas_collection.insert_one(ejercicio.dict(by_alias=True))
-        return str(result.inserted_id)
+    def __init__(self):
+        pass
+    def fix_objectid(self,doc):
+        if not doc:
+            return doc
+        doc = dict(doc)
+        if "_id" in doc:
+            doc["_id"] = str(doc["_id"])
+        return doc
 
-    @staticmethod
-    async def get_by_id(ejercicio_id: str):
-        return await subtemas_collection.find_one({"_id": ObjectId(ejercicio_id)})
+    async def createEjercicio(self, ejercicio: EjercicioCreate):
+        try:
+            ejercicio_dict = ejercicio.dict()
+            result = await ejercicios_collection.insert_one(ejercicio_dict)
+            return str(result.inserted_id)
+        except Exception as e:
+            print(f"Error al crear el ejercicio: {e}")
+            return None
 
-    @staticmethod
-    async def update(ejercicio_id: str, ejercicio: EjercicioCreate):
-        await subtemas_collection.update_one(
-            {"_id": ObjectId(ejercicio_id)},
-            {"$set": ejercicio.dict(by_alias=True)}
-        )
-
-    @staticmethod
-    async def delete(ejercicio_id: str):
-        await subtemas_collection.delete_one({"_id": ObjectId(ejercicio_id)})
-
-    @staticmethod
-    async def list_all():
-        return subtemas_collection.find()
-
+    async def getEjercicioById(self, id: str):
+        try:
+            ejercicio = await ejercicios_collection.find_one({"_id": ObjectId(id)})
+            print("Ejercicio encontrado:", ejercicio)
+            return self.fix_objectid(ejercicio)
+        except Exception as e:
+            print(f"Error al obtener el ejercicio: {e}")
+            return None
+    
+    
