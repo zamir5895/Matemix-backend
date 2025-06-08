@@ -9,3 +9,11 @@ class EjercicioCreate(BaseModel):
     pistas: list[str] = Field(default_factory=list)
     concepto_principal: str | None = None
     nivel: str 
+
+class EjercicioResueltoCreate(BaseModel):
+    alumno_id: str
+    salon_id: str
+    ejercicio_id: str
+    respuesta_usuario: str
+class UpdateRespuesta(BaseModel):
+    respuesta_usuario:str
